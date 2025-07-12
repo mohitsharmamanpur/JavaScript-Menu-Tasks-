@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>JS Utility Toolkit</title>
+  <style>
+    body { font-family: Arial; padding: 20px; background: #f5f5f5; }
+    video, canvas { border: 1px solid #333; margin-top: 10px; }
+    .section { margin-bottom: 30px; padding: 15px; background: white; border-radius: 10px; }
+    button { padding: 6px 12px; margin-top: 10px; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <h1>JavaScript Utility Toolkit</h1>
+
+  <!-- 1. Take Photo -->
+  <div class="section">
+    <h2>1. Take Photo</h2>
+    <video id="video" width="300" height="200" autoplay></video><br>
+    <button onclick="takePhoto()">Capture</button>
+    <canvas id="canvas" width="300" height="200"></canvas>
+  </div>
+
+  <!-- 2. Send Email -->
+  <div class="section">
+    <h2>2. Send Email (via EmailJS)</h2>
+    <form id="emailForm">
+      <input type="text" name="from_name" placeholder="Your Name"><br>
+      <input type="email" name="from_email" placeholder="Your Email"><br>
+      <textarea name="message" placeholder="Your Message"></textarea><br>
+      <button type="submit">Send Email</button>
+    </form>
+  </div>
+
+  <!-- 3. WhatsApp Message -->
+  <div class="section">
+    <h2>3. Send WhatsApp Message</h2>
+    <input type="text" id="waNum" placeholder="Phone (with country code)">
+    <input type="text" id="waMsg" placeholder="Message">
+    <button onclick="sendWhatsApp()">Send WhatsApp</button>
+  </div>
+
+  <!-- 4. Product View Tracker -->
+  <div class="section">
+    <h2>4. Track Most Viewed Product</h2>
+    <button onclick="viewProduct('Product A')">View Product A</button>
+    <button onclick="viewProduct('Product B')">View Product B</button>
+    <button onclick="viewProduct('Product C')">View Product C</button>
+    <p id="mostViewed"></p>
+  </div>
+
+  <!-- 5. Get IP and Location -->
+  <div class="section">
+    <h2>5. Get Current IP & Location</h2>
+    <button onclick="getLocation()">Get IP & Location</button>
+    <p id="locationInfo"></p>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+  <script>
+    emailjs.init("YOUR_EMAILJS_USER_ID"); // Replace with your EmailJS User ID
+
+    // 1. Take Photo
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => video.srcObject = stream);
+
+    function takePhoto() {
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    }
+
+    // 2. Send Email
+    document.getElementById('emailForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      emailjs.sendForm('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', this)
+        .then(() => alert('Email sent!'), err => alert('Error: ' + err));
+    });
+
+    // 3. Send WhatsApp
+    function sendWhatsApp() {
+      const number = document.getElementById('waNum').value;
+      const msg = encodeURIComponent(document.getElementById('waMsg').value);
+      window.open(`https://wa.me/${number}?text=${msg}`, '_blank');
+    }
+
+    // 4. Product View Tracking
+    function viewProduct(product) {
+      let count = localStorage.getItem(product) || 0;
+      localStorage.setItem(product, ++count);
+      updateMostViewed();
+    }
+
+    function updateMostViewed() {
+      let maxViews = 0, maxProduct = '';
+      ['Product A', 'Product B', 'Product C'].forEach(prod => {
+        let count = localStorage.getItem(prod) || 0;
+        if (count > maxViews) {
+          maxViews = count;
+          maxProduct = prod;
+        }
+      });
+      document.getElementById('mostViewed').innerText = `Most Viewed: ${maxProduct} (${maxViews} views)`;
+    }
+    updateMostViewed();
+
+    // 5. Get IP and Location
+    function getLocation() {
+      fetch('https://ipinfo.io/json?token=YOUR_TOKEN_HERE')
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById('locationInfo').innerText = `IP: ${data.ip}, City: ${data.city}, Country: ${data.country}`;
+        });
+    }
+  </script>
+
+</body>
+</html>
